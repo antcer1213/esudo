@@ -108,10 +108,14 @@ class eSudo(object):
             bz.pack_end(fr)
             fr.show()
         else:
+            bz1 = elementary.Box(win)
+            bz.pack_end(bz1)
+            bz1.show()
+
             lb = elementary.Label(win)
             lb.text = "<b>Password:</b>"
             lb.size_hint_align = 0.0, 0.5
-            bz.pack_end(lb)
+            bz1.pack_end(lb)
             lb.show()
 
         en = self.en = elementary.Entry(win)
@@ -124,8 +128,7 @@ class eSudo(object):
         if nowindow:
             fr.content = en
         else:
-            bz.pack_end(en)
-
+            bz1.pack_end(en)
 
         sep = elementary.Separator(win)
         sep.horizontal = True
@@ -268,7 +271,7 @@ class eSudo(object):
         print("Command done.")
         if not os.path.exists("/tmp/libesudo"):
             os.makedir("/tmp/libesudo")
-        mvexe = ecore.Exe("HOME=~root ; sudo -S mv -f ~/.Xauthority /tmp/libesudo", ecore.ECORE_EXE_PIPE_ERROR)
+        mvexe = ecore.Exe("HOME=~root ; sudo -S mv -f ~/.Xauthority /tmp/libesudo", ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
         mvexe.on_error_event_add(self.received_error, password)
 
         if self.end_cb:
