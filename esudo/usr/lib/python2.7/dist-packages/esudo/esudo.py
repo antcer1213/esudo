@@ -38,7 +38,10 @@ class eSudo(object):
             win.size_hint_align = evas.EVAS_HINT_FILL, evas.EVAS_HINT_FILL
             win.resize(300, 200)
             win.callback_delete_request_add(lambda o: elementary.exit())
+            win.layer_set(11)
+            #~ win.fullscreen = True
             win.show()
+            win.activate()
 
             bg = elementary.Background(win)
             bg.size_hint_weight = 1.0, 1.0
@@ -234,12 +237,24 @@ class eSudo(object):
         cmd = self.cmdline.entry
         print("Starting '%s'..."%cmd)
         try:
+            cmdparts = cmd.split(" ")
+            command = cmdparts[0]
+            for i in range(len(cmdparts)):
+                if i > 0:
+                    path = " ".join(cmdparts[i:])
+                    if os.path.exists(path):
+                        cmd = "%s '%s'"%(command, path)
+                        break
+        except:
+            pass
+        try:
             arguments = self.kwargs["cmdargs"]
             cmd = "%s %s"%(cmd, arguments)
         except:
             pass
         self.run_command("HOME=~root ; sudo -S %s" % (cmd), password)
 
+#--------Run Command
     def run_command(self, command, password):
         self.cmd_exe = cmd = ecore.Exe(command, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
         cmd.on_add_event_add(self.command_started)
@@ -261,17 +276,19 @@ class eSudo(object):
             print(event.data)
 
     def received_error(self, cmd, event, *args, **kwargs):
-        if not "sudo" in event.data:
+        if not "sudo" in event.data or not "password for" in event.data:
             print("Error: %s"%event.data)
         else:
             password = args[0]
             cmd.send(str(password)+"\n")
 
-    def command_done(self, cmd, event, password, *args, **kwargs):
+    def command_done(self, cmd, event, *args, **kwargs):
         print("Command done.")
         if not os.path.exists("/tmp/libesudo"):
-            os.makedir("/tmp/libesudo")
-        mvexe = ecore.Exe("HOME=~root ; sudo -S mv -f ~/.Xauthority /tmp/libesudo", ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
+            os.makedirs("/tmp/libesudo")
+        username = getpass.getuser()
+        password = args[0]
+        mvexe = ecore.Exe("HOME=/home/%s ; sudo -S mv -f ~/.Xauthority /tmp/libesudo ; HOME=~root ; sudo -S mv -f ~/.Xauthority /tmp/libesudo"%username, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
         mvexe.on_error_event_add(self.received_error, password)
 
         if self.end_cb:
@@ -284,7 +301,6 @@ class eSudo(object):
 if __name__ == "__main__":
     import sys
     cmd = " ".join(sys.argv[1:])
-
 
     elementary.init()
 
