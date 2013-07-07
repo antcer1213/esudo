@@ -255,7 +255,12 @@ class eSudo(object):
         except:
             pass
 
-        self.run_command("HOME=~root ; sudo -S %s" % (cmd), password)
+        if not os.path.exists("/tmp/libesudo"):
+            os.makedirs("/tmp/libesudo")
+        command  = "cp /home/%s/.Xauthority /tmp/libesudo"%getpass.getuser()
+        ecore.Exe(command, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
+
+        self.run_command("HOME='/tmp/libesudo' ; sudo -S %s" % (cmd), password)
 
 #--------Run Command
     def run_command(self, command, password):
@@ -263,7 +268,7 @@ class eSudo(object):
         cmd.on_add_event_add(self.command_started)
         cmd.on_data_event_add(self.received_data)
         cmd.on_error_event_add(self.received_error, password)
-        cmd.on_del_event_add(self.command_done, password)
+        cmd.on_del_event_add(self.command_done)
 
     def command_started(self, cmd, event, *args, **kwargs):
         print("Command started.\n")
@@ -287,10 +292,6 @@ class eSudo(object):
 
     def command_done(self, cmd, event, *args, **kwargs):
         print("Command done.")
-        if not os.path.exists("/tmp/libesudo"):
-            os.makedirs("/tmp/libesudo")
-        command  = "mv /home/%s/.Xauthority /tmp/libesudo"%getpass.getuser()
-        ecore.Exe(command, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
 
         if self.end_cb:
             try:
