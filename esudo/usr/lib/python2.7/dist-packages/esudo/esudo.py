@@ -202,7 +202,9 @@ class eSudo(object):
 
 #------------Username & Service To Use
         username = getpass.getuser()
-        service = 'sudo'
+
+        with open("/etc/esudo/service") as file:
+            service = file.readline()[:-1]
 
 #------------Start Password Test
         auth = PAM.pam()
@@ -216,7 +218,6 @@ class eSudo(object):
             pw_error_popup(en)
             en.entry = ""
             en.focus = True
-            print("Invalid password! Please try again.")
             return
         except:
             print("Internal error! File bug report.")
@@ -235,23 +236,25 @@ class eSudo(object):
     def esudo_ok(self, bt, en):
         password = en.entry
         cmd = self.cmdline.entry
+        cmdprts = cmd.split(" ")
+        cmdnum = len(cmdprts)
         print("Starting '%s'..."%cmd)
-        try:
-            cmdparts = cmd.split(" ")
-            command = cmdparts[0]
-            for i in range(len(cmdparts)):
+
+        if cmdnum > 1:
+            command = cmdprts[0]
+            for i in range(cmdnum):
                 if i > 0:
-                    path = " ".join(cmdparts[i:])
+                    path = " ".join(cmdprts[i:])
                     if os.path.exists(path):
                         cmd = "%s '%s'"%(command, path)
                         break
-        except:
-            pass
+
         try:
             arguments = self.kwargs["cmdargs"]
             cmd = "%s %s"%(cmd, arguments)
         except:
             pass
+
         self.run_command("HOME=~root ; sudo -S %s" % (cmd), password)
 
 #--------Run Command
@@ -286,10 +289,8 @@ class eSudo(object):
         print("Command done.")
         if not os.path.exists("/tmp/libesudo"):
             os.makedirs("/tmp/libesudo")
-        username = getpass.getuser()
-        password = args[0]
-        mvexe = ecore.Exe("HOME=/home/%s ; sudo -S mv -f ~/.Xauthority /tmp/libesudo ; HOME=~root ; sudo -S mv -f ~/.Xauthority /tmp/libesudo"%username, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
-        mvexe.on_error_event_add(self.received_error, password)
+        command  = "mv /home/%s/.Xauthority /tmp/libesudo"%getpass.getuser()
+        ecore.Exe(command, ecore.ECORE_EXE_PIPE_READ|ecore.ECORE_EXE_PIPE_ERROR|ecore.ECORE_EXE_PIPE_WRITE)
 
         if self.end_cb:
             try:

@@ -1,2 +1,11 @@
 #!/bin/sh
 cp -s -f /usr/bin/esudo /usr/bin/gksudo
+
+SUDOER='/etc/sudoers.d/esudo-properties'
+CONFIG='/etc/esudo/service'
+
+chmod 0440 $SUDOER
+chown root $SUDOER
+chgrp root $SUDOER
+chown -R root $CONFIG
+chgrp -R root $CONFIG
