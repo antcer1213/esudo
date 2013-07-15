@@ -85,26 +85,37 @@ class eSudo(object):
             bz.pack_end(sep)
             sep.show()
 
-        fr = elementary.Frame(win)
-        fr.text = "Command:"
-        fr.size_hint_align = evas.EVAS_HINT_FILL, 0.0
-        bz.pack_end(fr)
-        fr.show()
+        if self.args:
+            en = elementary.Entry(win)
+            en.line_wrap_set(2)
+            en.size_hint_align_set(-1.0, -1.0)
+            en.size_hint_weight_set(0.0, 0.0)
+            en.editable_set(False)
+            #~ en.scrollable_set(True)
+            en.entry_set("<b>Enter your password to perform<br>administrative tasks.</b><ps><ps>The application '%s' lets you modify<br>essential parts of your system."%self.cmd)
+            bz.pack_end(en)
+            en.show()
+        else:
+            fr = elementary.Frame(win)
+            fr.text = "Command:"
+            fr.size_hint_align = evas.EVAS_HINT_FILL, 0.0
+            bz.pack_end(fr)
+            fr.show()
 
-        if nowindow:
-            sep = elementary.Separator(win)
-            sep.horizontal = True
-            bz.pack_end(sep)
-            sep.show()
+            if nowindow:
+                sep = elementary.Separator(win)
+                sep.horizontal = True
+                bz.pack_end(sep)
+                sep.show()
 
-        self.cmdline = cmdline = elementary.Entry(win)
-        cmdline.elm_event_callback_add(self.entry_event)
-        cmdline.single_line = True
-        if self.cmd:
-            cmdline.text = self.cmd
-            cmdline.editable = False
-        fr.content = cmdline
-        cmdline.show()
+            self.cmdline = cmdline = elementary.Entry(win)
+            cmdline.elm_event_callback_add(self.entry_event)
+            cmdline.single_line = True
+            if self.cmd:
+                cmdline.text = self.cmd
+                cmdline.editable = False
+            fr.content = cmdline
+            cmdline.show()
 
         if nowindow:
             fr = elementary.Frame(win)
