@@ -4,14 +4,28 @@
 
 import esudo.esudo as esudo
 import elementary, sys
+import argparse
 
-if sys.argv[1] == "--desktop":
-    cmd = " ".join(sys.argv[4:])
+_ = str
+
+
+sys.argv.insert(0, "esudo")
+
+parser = argparse.ArgumentParser(prog='esudo-gksu', description=_('gksu replacement package - part of eSudo'))
+parser.add_argument('command', nargs='?', help=_('Command to run with elevated privileges.'))
+parser.add_argument('argument', nargs=argparse.REMAINDER, help=_('Arguments of command to run.'))
+clargs = vars(parser.parse_args())
+
+sys.argv = sys.argv[2:]
+
+if sys.argv[0] == "--desktop":
+    cmd = "synaptic"
+    args = sys.argv[4:]
 else:
-    cmd = " ".join(sys.argv[1:])
-cmd = "gksu-original %s"%cmd
+    cmd = " ".join(sys.argv)
+    args = None
 
-start = esudo.eSudo(cmd)
+start = esudo.eSudo(cmd, None, None, None, args)
 
 elementary.run()
 elementary.shutdown()

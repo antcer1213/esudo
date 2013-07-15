@@ -4,6 +4,14 @@
 
 import esudo.esudo as esudo
 import elementary, sys
+import argparse
+
+_ = str
+
+parser = argparse.ArgumentParser(prog='esudo', description=_('A GUI sudo tool in python and elementary'))
+parser.add_argument('command', nargs='?', help=_('Command to run with elevated privileges.'))
+parser.add_argument('argument', nargs=argparse.REMAINDER, help=_('Arguments of command to run.'))
+clargs = vars(parser.parse_args())
 
 cmd = " ".join(sys.argv[1:])
 

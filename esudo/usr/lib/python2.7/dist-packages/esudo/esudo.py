@@ -13,7 +13,9 @@ import PAM
 import ecore
 import evas
 import elementary
+import argparse
 
+_ = str
 
 #----Popups
 def pw_error_popup(en):
@@ -238,6 +240,10 @@ class eSudo(object):
         cmd = self.cmdline.entry
         cmdprts = cmd.split(" ")
         cmdnum = len(cmdprts)
+
+        if self.args:
+            cmd = "%s %s"%(cmd, ' '.join(self.args[0]))
+
         print("Starting '%s'..."%cmd)
 
         if cmdnum > 1:
@@ -302,6 +308,12 @@ class eSudo(object):
 
 if __name__ == "__main__":
     import sys
+
+    parser = argparse.ArgumentParser(prog='esudo', description=_('A GUI sudo tool in python and elementary'))
+    parser.add_argument('command', nargs='?', help=_('Command to run with elevated privileges.'))
+    parser.add_argument('argument', nargs=argparse.REMAINDER, help=_('Arguments of command to run.'))
+    clargs = vars(parser.parse_args())
+
     cmd = " ".join(sys.argv[1:])
 
     elementary.init()

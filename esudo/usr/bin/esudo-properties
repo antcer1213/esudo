@@ -1,10 +1,12 @@
 #!/usr/bin/python
 import elementary, evas, ecore
-
+import argparse
 
 """eSudo Properties - Part of eSudo package
 
             Written by :    AntCer           """
+
+_ = str
 
 
 class eSudo_Properties():
@@ -13,36 +15,17 @@ class eSudo_Properties():
         self.SERVICES = SERVICES = {'sudo' : None, 'passwd' : None, 'login' : None}
 
         if command != None:
-            self.cmd = cmd = command
-            if "-h" in cmd or "--help" in cmd:
-                print("usage: esudo-properties [-h] [-s [service]]\n")
-                print("Configures properties for eSudo, an Elementary frontend for 'sudo'\n")
-                print("arguments:")
-                print("\tnone\n")
-                print("optional arguments:")
-                print("\t-s\tIf no service is given as argument, returns list of services. If argument is given, changes authentication service.")
-                print("\t-h, --help\tShow this help message and exit.")
-                elementary.exit()
-            elif "-s" in cmd:
-                cmdparts = cmd.split()
-                num = len(cmdparts)
-                if num <= 2:
-                    if cmdparts[0] == "-s":
-                        if 1 == num:
-                            for service in SERVICES.keys():
-                                print(service)
-                        else:
-                            if cmdparts[1] == "sudo" or cmdparts[1] == "passwd" or cmdparts[1] == "login":
-                                    self.change(None, cmdparts[1], "1")
-                                    print("Successfully changed authentification service.")
-                            else:
-                                print("ERROR: Invalid service, '%s'."%cmdparts[1])
-                    else:
-                        print("ERROR: Invalid argument, '%s'."%cmdparts[0])
-                else:
-                    print("ERROR: Invalid number of arguments.")
+
+            parser = argparse.ArgumentParser(prog='esudo-properties', description=_('Configures properties for eSudo, an Elementary frontend for sudo'))
+            parser.add_argument('-s', nargs='?', choices=SERVICES.keys(), help=_('If no service is given as argument, returns list of services. If argument is given, changes authentication service.'))
+            clargs = vars(parser.parse_args())
+
+            if clargs['s']:
+                self.change(None, clargs['s'], "1")
+                print("Successfully changed authentification service to '%s'."%clargs['s'])
             else:
-                print("ERROR: Unidentified arguments, '%s'."%cmd)
+                for service in SERVICES.keys():
+                    print(service)
 
             elementary.exit()
 
@@ -171,9 +154,8 @@ if __name__ == "__main__":
 
     cmd = None
 
-    if len(sys.argv) > 1:
-        cmd = " ".join(sys.argv[1:])
-
+    if sys.argv[1:]:
+        cmd = True
 
     elementary.init()
 
